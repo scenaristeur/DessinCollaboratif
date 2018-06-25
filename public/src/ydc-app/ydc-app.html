@@ -1,5 +1,5 @@
 <!--https://mobiforge.com/design-development/html5-mobile-web-canvas-->
-
+<script src="./lib/socket.io.slim.js"></script>
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/polymer/lib/utils/render-status.html">
 <link rel="import" href="../../bower_components/lazy-imports/lazy-imports-mixin.html">
@@ -26,7 +26,7 @@
   * {
     margin: 0;
     padding: 0;
-  overflow: hidden;
+    overflow: hidden;
   }
 
   /* page styles */
@@ -67,7 +67,7 @@
     top: 0;
     left: 0;
     background: #eee;
-  /*  box-shadow: 0 0 20px #ccc; */
+    /*  box-shadow: 0 0 20px #ccc; */
     cursor: default;
   }
 
@@ -132,14 +132,14 @@
   }
 </style>
 <!--<div id="container"> -->
-  <aside>
-    <color-picker
-    id="colorpicker"
-    autoconfirm
-    native
-    value="{{color}}">
-  </color-picker>
-  <paper-button id="fullBtn" raised id="full" on-tap="fullscreen">full</paper-button>
+<aside>
+  <color-picker
+  id="colorpicker"
+  autoconfirm
+  native
+  value="{{color}}">
+</color-picker>
+<paper-button id="fullBtn" raised id="full" on-tap="fullscreen">full</paper-button>
 </aside>
 <aside class="toolbar" id="colortoolbar">
 
@@ -182,7 +182,7 @@
 
 <!--    native -->
 </template>
-<script src="/socket.io/socket.io.js"></script>
+<!--<script src="/socket.io/socket.io.js"></script> -->
 <!--<script src="js/main.js"></script> -->
 
 <script>
@@ -197,8 +197,31 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
       canvas: {
         type: Object
       },
-      socket: {
-        type: Object
+      /**
+      * Current connection status. Can be "connected", "disconnected", or "reconnecting".
+      */
+      status: {
+        type: String,
+        notify: true,
+        observer: '_consoleStatus'
+      },
+      /**
+      * Internal reference to the WebSocket
+      */
+      socket: {Object,
+        notify: true
+      },
+      /**
+      * Registered _handlers by message type
+      * @type {<String, Function>[]}
+      */
+      _handlers: {
+        type: Object,
+        value: [],
+      },
+      retry: {
+        type: Number,
+        value:10
       },
       sizeToolbar: {
         type: Object
@@ -239,6 +262,7 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
 constructor(){
   super();
   this._resize = this.resizeCanvas.bind(this);
+  this.connectSocket();
   Polymer.RenderStatus.afterNextRender(this, function() {
     this._deferred();
   });
@@ -408,7 +432,7 @@ _deferred(){
 
   app.socket.on('lastScreenshot', function(strDataURI){
     console.log('lastscreenshot')
-  // console.log(strDataURI)
+    // console.log(strDataURI)
     var ctx = app.canvas.getContext('2d');
     var img = new Image;
 
@@ -536,8 +560,8 @@ initCanvas(){
 
 connectedCallback() {
   super.connectedCallback();
-//  window.addEventListener('hashchange', this._boundListener);
-this.canvas=this.$.canvas;
+  //  window.addEventListener('hashchange', this._boundListener);
+  this.canvas=this.$.canvas;
   window.addEventListener('resize', this._resize, false);
   window.addEventListener('orientationchange', this._resize, false);
   this._resize();
@@ -546,7 +570,7 @@ this.canvas=this.$.canvas;
 resizeCanvas() {
   //  canvas.width = window.innerWidth;
   //  canvas.height = window.innerHeight;
- this.canvas = this.$.canvas;
+  this.canvas = this.$.canvas;
   console.log(this.canvas)
   var tempCanvas = document.createElement('canvas');
   tempCanvas.id = "tempCanvas"
@@ -638,6 +662,75 @@ fullscreen(){
     this.mozRequestFullScreen();
   }
 }
+
+_consoleStatus(newValue, oldValue){
+  console.log(oldValue +" -> "+ newValue);
+  if(oldValue == "reconnecting" && newValue =="disconnected"){
+    this.retry --;
+    console.log(this.retry);
+    if (this.retry <= 0){
+      this.socket.disconnect();
+    }
+  }
+}
+
+disconnectSocket(){
+  this.socket.disconnect();
+}
+
+connectSocket(connectUri, token) {
+  var app = this;
+  /*this.socket = io(connectUri, {
+  'query': `token=${token}`,
+  timeout: 2000,
+});*/
+this.socket = io();
+// Parse response messages retrieving 'type'
+this.socket.on('message', message => {
+  // Execute all handlers that are registered for this namespace
+  for (let handler of this._handlers) {
+    if (message.type.startsWith(handler.messageType)) {
+      handler.handler(message);
+    }
+  }
+});
+// Register listeners to expose connection status
+this.socket.on('connect', () => this.status = 'connected');
+this.socket.on('disconnect', () => this.status = 'disconnected');
+this.socket.on('connect_error', () => this.status = 'disconnected');
+this.socket.on('reconnecting', () => this.status = 'reconnecting');
+this.socket.on('reconnect', () => this.status = 'connected');
+this.socket.on('error', e => {
+  console.warn(`WebSocket error: ${JSON.stringify(e)}`);
+});
+this.socket.on('updatechat', function (username, data) {
+  console.log('update chat '+ username +" - "+ data)
+  console.log(app.room)
+  console.log(app.socket.room)
+  app.agentSocket.send('agentChat', {type: "updateChat", username: username, data: data, room: app.room});
+});
+this.socket.on('initrooms', function (rooms) {
+  console.log('initrooms ')
+  app.agentSocket.send('agentDialogs', {type: "initrooms", rooms: rooms});
+});
+this.socket.on('updaterooms', function(rooms, current_room) {
+  app.agentSocket.send('agentDialogs', {type: "updaterooms", rooms: rooms, current_room: current_room});
+  app.agentSocket.send('agentChat', {type: "updaterooms", rooms: rooms, current_room: current_room});
+});
+
+this.socket.on('tick', function(data){
+  console.log(data);
+  console.log("N'EST plus  utilisé ??? voir avec tick/snapshot du serveur ?")
+  //  app.set('addToGraph',data);
+  app.agentSocket.send('agentGraph', {type: "addToGraph", data: data});
+});
+
+this.socket.on('initDb', function(data){
+  console.log(data);
+  app.agentSocket.send('agentGraph', {type: "populateVis", data: data});
+});
+}
+
 
 
 }

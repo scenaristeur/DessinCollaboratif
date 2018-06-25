@@ -13,7 +13,7 @@ var io = require('socket.io')(server);
 
 
 /* CONFIGURATION DU SERVEUR WEB */
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3010;
 
 
 var num_clients = 0;
@@ -36,6 +36,12 @@ server.listen(port, function() {
 });
 // route to static files
 app.use(express.static(__dirname + '/public'));
+app.get('*', function(req, res){
+  //  console.log(req.originalUrl);
+  //  console.log(res);
+  //nécessaire pour ne pas avoir des cannot get sur http://127.0.0.1:3000/view2
+  res.sendFile("/public/index.html", {root: '.'});
+});
 
 io.on('connection', function(socket) {
   ++num_clients
@@ -96,11 +102,12 @@ io.on('connection', function(socket) {
 });
 
 // listen
+/*
 server.listen(app.get('port'), function () {
   var host = server.address().address;
   var port = server.address().port;
   console.log('listening at http://%s:%s', host, port);
-});
+}); */
 
 
 function startScreenshots(){
