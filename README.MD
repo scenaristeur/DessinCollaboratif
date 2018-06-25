@@ -63,3 +63,8 @@ ln -s /etc/init.d/sketchpad /etc/rc.d/S99sketchpad
 ```
 
 L'application sketchpad sera accessible sur le port 3010, comme spécifié dans le fichier index.js
+
+<!--https://mobiforge.com/design-development/html5-mobile-web-canvas-->
+//https://github.com/scenaristeur/spoggy/blob/master/public/src/spog-socket/spog-socket.html
+//http://psitsmike.com/2011/10/node-js-and-socket-io-multiroom-chat-tutorial/
+//https://www.codementor.io/codementorteam/socketio-player-matchmaking-system-pdxz4apty

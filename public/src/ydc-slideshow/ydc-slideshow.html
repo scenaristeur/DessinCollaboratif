@@ -1,0 +1,59 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/image-caroussel/image-caroussel.html">
+
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../../bower_components/polymer/lib/utils/render-status.html">
+
+<dom-module id="ydc-slideshow">
+<!--    <link rel="lazy-import" group="lazy" href="./import.html">-->
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    img{
+       box-shadow: 0 0 20px #ccc;
+    }
+    </style>
+    <paper-button id="slideshowBtn" raised id="slide" on-tap="_hideGalerie">Retour</paper-button>
+[[files.length]]
+    <image-carousel aria-label="example carousel">
+  <!--    <template is="dom-repeat" items='["https://c2.staticflickr.com/2/1217/4607963354_e1a8fea210_z.jpg", "http://www.hdwallpapery.com/static/images/1391099215267_hero2_niQ3B7S.jpg", "https://tse4.mm.bing.net/th?id=ORT.TH_470633631&pid=1.12&eid=G.470633631"]' slot="images"> -->
+  <template is="dom-repeat" items="[[files]]" slot="images">
+
+        <img src="[[item]]" class="scrolling-images" alt$="demo image alt [[index]]" width="100%" height="374px">
+      </template>
+    </image-carousel>
+  </template>
+
+  <script>
+  /**
+  * `ydc-slideshow`
+  *
+  *
+  * @customElement
+  * @polymer
+  * @demo demo/index.html
+  */
+  class YdcSlideshow extends Polymer.Element {
+    static get is() { return 'ydc-slideshow'; }
+    static get properties() {
+      return {
+        showslideshow: {
+          type: Boolean,
+          notify: true
+        }
+      };
+    }
+    _hideGalerie(){
+      this.showslideshow = false;
+      console.log(this.showslideshow)
+    }
+  }
+
+  window.customElements.define(YdcSlideshow.is, YdcSlideshow);
+  </script>
+
+
+</dom-module>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Slider1</title>
+<script src="js/jquery-2.1.3.min.js"></script>
+    <script src="js/cycle2.js"></script>
+<style type="text/css">
+
+*{
+		margin:0;
+		padding:0;
+	}
+	#container {
+		width:100%;
+		position:relative;
+		background:rgba(231, 76, 60,1.0);
+		overflow:hidden;
+		}
+	#slideshow {
+		height:80%;
+		width:80%;
+		position:relative;
+		margin: 10px auto;
+		background:rgba(236, 240, 241,1.0);
+		box-shadow:0px 0px 10px 1px  rgba(30,30,30,0.61);
+		border-radius:5px;
+		}
+	#slideshow img {
+		height:95%;
+		width:98%;
+		position: absolute;
+		z-index:10;
+		min-width:98%;
+		min-height:95%;
+		left:0;
+		right:0;
+		margin:10px auto;
+		}
+	#pager {
+		height:20%;
+		width:80%;
+		margin: 10px auto;
+		position:relative;
+		}
+	#pager div {
+		height:85px;
+		width:125px;
+		border-radius: 5px;
+		background:rgba(236, 240, 241,1.0);
+		box-shadow:0px 0px 5px 1px rgba(0,0,0,0.50);
+		margin:auto auto;
+		text-align:center;
+		position:relative;
+		margin: 10px 15px;
+		float: left;
+		cursor: pointer;
+		}
+	#pager div img {
+		position:absolute;
+		left:0;
+		top:0;
+		bottom:0;
+		right:0;
+		margin:auto;
+			}
+</style>
+</head>
+
+<body>
+<div id="container">
+ 
+
+ <div id="slideshow" class="cycle-slideshow" 
+ data-cycle-fx="fade" 
+ data-cycle-pager-fx = "fade" 
+ data-cycle-speed="600"  
+ data-cycle-timeout="3000" 
+ data-cycle-pager = "#pager" 
+ data-cycle-pager-template="<div><img src='{{src}}' width=120 height=80></div>"
+     > 
+      
+        <img src="img/back.jpg" id="intro_img"/>
+        <img src="img/3476669265_ec0d758217_o.jpg" id="intro_img"/>
+        <img src="img/footer-photo1.jpg" id="intro_img"/>
+         <img src="img/Path Through meadow.jpg" id="intro_img"/>
+         <img src="img/Snow Mt Milky Way.jpg" id="intro_img"/>
+         <img src="img/Awesome Mountain.jpeg" id="intro_img"/>
+         <img src="img/Spring Scenery.jpg" id="intro_img"/>
+  </div>
+
+        <div id="pager"></div>
+        
+</div>
+
+<script type="text/javascript">
+
+function height() {
+	var h = window.innerHeight;
+	var a = document.getElementById('container');
+	a.style.height = h+"px";
+	}
+	
+window.addEventListener('load',height);
+window.addEventListener('resize',height);
+</script>
+</body>
+</html>
