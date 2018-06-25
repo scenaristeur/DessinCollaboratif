@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Sketchpad</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="container">
+        <aside class="toolbar" id="size-toolbar">
+        </aside>
+        <div id="main">
+            <canvas id="scratchpad" width="800" height="500"></canvas>
+        </div>
+        <aside class="toolbar" id="color-toolbar">
+        </aside>
+
+        <footer id="footer">
+
+
+          <div><a href="#" id="download" download="image.png"><button align="center">Sauvegarder <br> l'image</button></a></div><br><br>
+
+            Users connected: <span id="counter">?</span> &middot;
+            Made by <a href="https://mrozwadowski.com/">MR</a> &middot;
+            Fork me on <a href="https://github.com/hejmsdz/sketchpad">GitHub</a>
+            Forked by scenaristeur at <a href="https://github.com/scenaristeur/sketchpad">Scenaristeur/sketchpad</a>
+        </footer>
+    </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -4,13 +4,16 @@ var screenshotDelay = 60000; // 60000 = screenshot toutes les minutes
 
 var fs = require('fs');
 var express = require('express');
-var http = require('http');
-var socketio = require('socket.io');
-
-// create the servers
 var app = express();
-var server = http.Server(app);
-var io = socketio(server);
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+//https://github.com/scenaristeur/spoggy/blob/master/public/src/spog-socket/spog-socket.html
+//http://psitsmike.com/2011/10/node-js-and-socket-io-multiroom-chat-tutorial/
+//https://www.codementor.io/codementorteam/socketio-player-matchmaking-system-pdxz4apty
+
+
+/* CONFIGURATION DU SERVEUR WEB */
+var port = process.env.PORT || 3000;
 
 
 var num_clients = 0;
@@ -28,8 +31,9 @@ var infos_clients = {
 }
 var lastScreenshot;
 
-// set port from the environment or fall back
-app.set('port', (process.env.PORT || 3010));
+server.listen(port, function() {
+  console.log('Server listening at port %d', port);
+});
 // route to static files
 app.use(express.static(__dirname + '/public'));
 

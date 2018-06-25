@@ -1,0 +1,54 @@
+/* minimal reset */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/* page styles */
+body {
+    background: #ddd;
+    font-family: sans-serif;
+}
+
+@media screen and (max-height: 650px) {
+    #size-toolbar {
+        display: none;
+    }
+}
+
+@media screen and (max-height: 600px) {
+    #color-toolbar {
+        display: none;
+    }
+}
+
+button {
+    border: none;
+    background: #aaa;
+    width: 45px;
+    height: 45px;
+    border-radius: 30px;
+    margin: 2px;
+}
+
+#container {
+    width: 800px;
+    margin: 1em auto 0;
+}
+
+#scratchpad {
+    background: #eee;
+    box-shadow: 0 0 20px #ccc;
+    cursor: default;
+}
+
+#footer {
+    margin-top: 1em;
+    font-size: .6em;
+    color: #888;
+    text-align: center;
+}
+
+#footer a {
+    color: #444;
+}
