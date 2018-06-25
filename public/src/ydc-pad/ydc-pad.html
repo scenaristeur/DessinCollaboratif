@@ -1,0 +1,36 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="ydc-pad">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]!</h2>
+  </template>
+
+  <script>
+    /**
+     * `ydc-pad`
+     *
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class YdcPad extends Polymer.Element {
+      static get is() { return 'ydc-pad'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'ydc-pad'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(YdcPad.is, YdcPad);
+  </script>
+</dom-module>
