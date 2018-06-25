@@ -1,0 +1,40 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="ydc-menu">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]!</h2>
+    - Capture
+    - site web
+    - qrcode
+
+  </template>
+
+  <script>
+    /**
+     * `ydc-menu`
+     *
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class YdcMenu extends Polymer.Element {
+      static get is() { return 'ydc-menu'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'ydc-menu'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(YdcMenu.is, YdcMenu);
+  </script>
+</dom-module>

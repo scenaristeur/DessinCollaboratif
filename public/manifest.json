@@ -1,0 +1,6 @@
+{
+  "name": "ydc",
+  "short_name": "ydc",
+  "start_url": "/",
+  "display": "standalone"
+}

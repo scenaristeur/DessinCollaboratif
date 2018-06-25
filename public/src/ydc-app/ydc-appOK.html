@@ -1,0 +1,601 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymer/lib/utils/render-status.html">
+<link rel="import" href="../../bower_components/lazy-imports/lazy-imports-mixin.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="ydc-app">
+  <!--  <link  rel="lazy-import" group="lazy"  href="../ydc-pad/ydc-pad.html">
+  <link  rel="lazy-import" group="lazy"  href="../ydc-palette/ydc-palette.html">
+  <link  rel="lazy-import" group="lazy"  href="../ydc-pinceau/ydc-pinceau.html">
+  <link  rel="lazy-import" group="lazy"  href="../ydc-menu/ydc-menu.html">
+  <link rel="lazy-import" group="lazy" href="../../bower_components/valle-speed-dial/valle-speed-dial.html">
+  <link rel="lazy-import" group="lazy" href="../../bower_components/valle-speed-dial/valle-speed-dial-action.html">
+-->
+<link rel="lazy-import" group="lazy"  href="../../bower_components/color-picker/color-picker.html">
+<link rel="lazy-import" group="lazy"  href="../../bower_components/color-picker/color-element.html">
+<template>
+  <style>
+  :host {
+    display: block;
+
+  }
+  /* minimal reset */
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* page styles */
+  body {
+    background: #ddd;
+    font-family: sans-serif;
+  }
+
+button {
+  border: none;
+  background: #aaa;
+  width: 45px;
+  height: 45px;
+  border-radius: 30px;
+  margin: 2px;
+}
+
+#container {
+  width: 800px;
+  margin: 1em auto 0;
+}
+
+#scratchpad {
+  top: 0;
+  left: 0;
+  width: 640px;
+  height: 360px;
+/*  bottom: 0px  !important;
+   border: 1px solid lightgray; */
+   background: #eee;
+    box-shadow: 0 0 20px #ccc;
+    cursor: default;
+/*  background: linear-gradient(to bottom, rgba(55, 55, 255, 0.2), rgba(200, 200, 10, 0.2));
+  width: 90vw;*/
+}
+
+#footer {
+
+  margin-top: 1em;
+  font-size: .6em;
+  color: #888;
+  text-align: center;
+}
+
+@media screen and (max-height: 650px) {
+  #footercredits {
+    display: none;
+  }
+  button {
+    width: 25px;
+    height: 25px;
+    right: 20;
+  }
+  #footer{
+    position: fixed;
+    right: 0;
+    bottom: 15px;
+    width: 20vw;
+    right: 40px;
+  }
+  #colorpicker {
+    position: fixed;
+    right: 15px;
+    top: 15px;
+  }
+
+  #sizetoolbar {
+    position: fixed;
+    left: 15px;
+    bottom: 15px;
+  }
+  #colortoolbar {
+    position: fixed;
+    right: 15px;
+    top: 60px;
+    width: 50px;
+  }
+}
+
+#footer a {
+  color: #444;
+}
+
+
+#infos {
+  position: fixed;
+  left: 15px;
+  top: 40px;
+}
+</style>
+<div id="container">
+  <aside>
+    <color-picker
+    id="colorpicker"
+    autoconfirm
+    native
+    value="{{color}}">
+    </color-picker>
+    </aside>
+  <aside class="toolbar" id="colortoolbar">
+
+  </aside>
+<canvas id="scratchpad" ></canvas>
+
+<!--
+<aside class="infos" id="infos">
+  <template is="dom-repeat" items="{{infos}}">
+    {{item.nom}} : {{item.valeur}} <br>
+  </template>
+-->
+
+</aside>
+<aside class="toolbar" id="sizetoolbar">
+</aside>
+
+<footer id="footer">
+  <table>
+    <tr>
+      <td>
+        <a href="#" id="download" download="image.png"><button align="center">Save</button></a>
+        <paper-button raised id="full" on-tap="fullscreen">full</paper-button>
+      </td>
+      <td id="footercredits">
+        Utilisateurs : <span id="counter">?</span> &middot;<br>
+        inspiré de <a href="https://github.com/hejmsdz/sketchpad">sketchpad</a> &middot;<br>
+        Forked by scenaristeur at <a href="https://github.com/scenaristeur/lininoapps/tree/master/root/ydc">scenaristeur/ydc</a>
+      </td>
+    </tr>
+  </table>
+
+
+</footer>
+</div>
+
+
+
+
+<!--    native -->
+</template>
+<script src="/socket.io/socket.io.js"></script>
+<!--<script src="js/main.js"></script> -->
+
+<script>
+/**
+* @customElement
+* @polymer
+*/
+class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
+  static get is() { return 'ydc-app'; }
+  static get properties() {
+    return {
+      canvas: {
+        type: Object
+      },
+      socket: {
+        type: Object
+      },
+      sizeToolbar: {
+        type: Object
+      },
+      colorToolbar: {
+        type: Object
+      },
+      counter: {
+        type: Number
+      },
+      colors: {
+        type: Array,
+        value: []
+      },
+      color: {
+        type: Object,
+        value: '#000000',
+        observer: "colorChanged"
+      },
+      snapshotLines: {
+        type: Array,
+        value: []
+      },
+      tickDelay: {
+        type: Number,
+        value: 1000
+      },
+    /*  fullscreen:{
+        type: Boolean,
+        value: false
+      },*/
+      infos:{
+        type: Array,
+        value: []
+      }
+    };
+  }
+  constructor(){
+    super();
+    Polymer.RenderStatus.afterNextRender(this, function() {
+      this._deferred();
+    });
+  }
+  _deferred(){
+    this.importLazyGroup('lazy').then((results) => {
+      this.dispatchEvent(new CustomEvent('import-loaded', results));
+    });
+    var app = this;
+
+
+    this.socket = io();
+    this.sizeToolbar = this.$.sizetoolbar;
+    this.colorToolbar = this.$.colortoolbar;
+    this.counter = this.$.counter;
+    var oldPos = {};
+    var size = 4;
+
+
+
+
+
+    this.initCanvas();
+    // populate the toolbars
+    for (var i=.5; i<10; i++) {
+      var lineSize = Math.round(i*2);
+      var el = document.createElement('button');
+      el.innerHTML = lineSize;
+      el.dataset.size = lineSize;
+      el.addEventListener('click', function() {
+        size = this.dataset.size;
+      });
+      this.sizeToolbar.appendChild(el);
+    }
+
+    app.colors = [];
+    for (var i=0; i<10; i++) {
+      //  colors.push('hsl('+(36*i-6)+', 93%, 47%)');
+      var col = app.hslToRgb(36*i-6, '93%', '47%')
+      app.push('colors', col);
+    }
+    //  colors.push('#eee', '#222');
+    //  var br = document.createElement("br");
+    for (var i=0; i<app.colors.length; i++) {
+      var el = document.createElement('button');
+      el.dataset.color = app.colors[i];
+      el.style.background = app.colors[i];
+      el.addEventListener('click', function() {
+        app.set('color',this.dataset.color);
+      });
+      this.colorToolbar.appendChild(el);
+      //  this.colorToolbar.appendChild(br);
+    }
+
+
+    function eventToXY(e) {
+      return {
+        x: e.offsetX || e.layerX || e.clientX - app.canvas.offsetLeft,
+        y: e.offsetY || e.layerY || e.clientY - app.canvas.offsetTop
+      };
+    }
+
+    function line(start, end, size, color) {
+      var ctx = app.ctx;
+      var oldSize = ctx.lineWidth;
+      var oldColor = ctx.fillStyle;
+
+      ctx.lineWidth = size;
+      ctx.strokeStyle = color;
+
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+      ctx.closePath();
+
+      ctx.lineWidth = oldSize;
+      ctx.strokeStyle = oldColor;
+    }
+
+    function handleStart(e) {
+      oldPos = eventToXY(e);
+      handleMove(e); // draw a single point
+    }
+
+    function handleMove(e) {
+      var newPos = eventToXY(e);
+      var data = {start: oldPos, end: newPos, size: size, color: app.color};
+      app.sendLines(data);
+      line(oldPos, newPos, size, app.color);
+      oldPos = newPos;
+    };
+
+    function handleEnd(e) {
+      oldPos = {};
+    }
+
+    app.canvas.addEventListener('mousedown', function(e) {
+      if (e.which == 1) {
+        handleStart(e);
+      }
+    });
+
+    app.canvas.addEventListener('mousemove', function(e) {
+      e.preventDefault();
+      if (e.buttons & 1) {
+        handleMove(e);
+      }
+    });
+
+    app.canvas.addEventListener('mouseout', handleEnd);
+
+    app.canvas.addEventListener('touchstart', function(e) {
+      var touches = e.touches;
+      if (touches.length == 1) {
+        handleStart(touches[0]);
+      }
+    });
+
+    app.canvas.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+      var touches = e.touches;
+      if (touches.length == 1) {
+        //  console.log(eventToXY(touches[0]));
+        handleMove(touches[0]);
+      }
+    });
+
+    app.canvas.addEventListener('touchend', handleEnd);
+
+    // remote events
+    app.socket.on('num_clients', function(infos_clients) {
+      //  console.log(infos_clients)
+      //  app.tickDelay = infos_clients.tickDelay;
+      //  console.log(app.tickDelay)
+      app.set('typeSync', infos_clients.typeSync)
+      if(app.typeSync == 'async'){
+        app.launchAsync(infos_clients.tickDelay);
+      }else{
+        if(app.snapshotLines.length >0){
+          console.log("tock");
+          app.io.emit('snapshotLines', app.snapshotLines);
+          app.snapshotLines = new Array();
+        }
+        clearInterval(app.tickInterval);
+      }
+      app.counter.innerHTML = infos_clients.num_clients + " : " +app.typeSync;
+    });
+    // mode sync
+    app.socket.on('line', function(data) {
+      line(data.start, data.end, data.size, data.color);
+    });
+    //mode async
+    app.socket.on('tick', function(data){
+      //  console.log(data);
+      //  console.log(data.lines);
+      let lines = data.lines;
+      lines.forEach(function(l){
+        line(l.start, l.end, l.size, l.color);
+      });
+    });
+
+    app.socket.on('screenshot', function() {
+      var screenshot = app.screenshot();
+        app.socket.emit('screenshot', screenshot);
+    });
+
+    app.socket.on('lastScreenshot', function(strDataURI){
+      console.log(strDataURI)
+      var ctx = app.canvas.getContext('2d');
+      var img = new Image;
+
+      img.onload = function(){
+        ctx.drawImage(img,0,0, 640, 360); // Or at whatever offset you like
+      };
+      img.src = strDataURI;
+      /*  img.style.width=window.innerWidth;
+      img.style.height = window.innerHeight;*/
+    })
+
+    app.socket.on('disconnect', function() {
+      var screenshot = app.screenshot();
+        app.socket.emit('screenshot', screenshot);
+    });
+
+    /*window.onbeforeunload = function(e) {
+    //  app.screenshot();
+    return('Please press the Logout button to logout.') ;
+  }*/
+
+  window.onbeforeunload = function(){
+  var screenshot =   app.screenshot();
+    app.socket.emit('screenshot', screenshot);
+  //  return 'Are you sure you want to leave?';
+  };
+
+
+  // Get the canvas element form the page
+
+
+
+
+
+//  this.$.full.addEventListener("click",fullscreen)
+  /*
+  if (confirm('Passer en mode Plein écran')) {
+  fullscreen();
+} else {
+alert("YDC ne fonctionne qu'en plein ecran");
+}*/
+// download
+const download = this.$.download;
+const rand = i=>Math.random()*i<<0;
+const fileName = `image${100+rand(100)}.png`;
+
+function onClickAnchor(e) {
+  app.canvas.style.backgroundColor = 'rgba(255,255,255)';
+  var screenshot;
+  if (window.navigator.msSaveBlob) {
+    screenshot = app.canvas.msToBlob()
+    window.navigator.msSaveBlob(screenshot, fileName);
+    e.preventDefault();
+  } else {
+    screenshot = app.canvas.toDataURL();
+    download.setAttribute('download', fileName);
+    download.setAttribute('href', screenshot);
+  }
+  app.socket.emit('screenshot', screenshot);
+}
+
+download.addEventListener('click', onClickAnchor);
+
+
+}
+
+ fullscreen(){
+  var app = this;
+  var screenshot = app.screenshot()
+  //  app.canvas.width  = window.innerWidth;
+  //  app.canvas.height = window.innerHeight;
+  if(app.webkitRequestFullScreen) {
+    app.webkitRequestFullScreen();
+  }
+  else {
+    app.mozRequestFullScreen();
+  }
+  app.initCanvas();
+  console.log(strDataURI)
+  var ctx = app.canvas.getContext('2d');
+  var img = new Image;
+
+  img.onload = function(){
+    ctx.drawImage(img,0,0, 640, 360); // Or at whatever offset you like
+  };
+  img.src = strDataURI;
+}
+
+launchAsync(tickDelay){
+  var app = this;
+  tickDelay = tickDelay + Math.floor(Math.random() * tickDelay ); // DEcalage pour que tous les clients n'envoie pas en même temps
+
+  //async
+  app.tickInterval = setInterval(function() {
+    //A intervalles réguliers, on envoie à tout utilisateur connecté, un snapshot des dernières modifications et on réinitialise les lines stockées dans le snapshot
+    //  console.log("tick");
+    //  console.log(snapshot);
+    if(app.snapshotLines.length >0){
+      //  console.log("tock");
+      app.sendSnaphotLines();
+    }
+  }, tickDelay);
+}
+
+sendLines(data){
+  if (this.typeSync == "sync"){
+    this.socket.emit('line', data);
+  }else{
+    this.push('snapshotLines', data);
+    //    console.log(this.snapshotLines)
+  }
+}
+sendSnaphotLines(){
+  this.socket.emit('snapshotLines', this.snapshotLines);
+  //socket.broadcast.emit('tick', snapshot);
+  this.snapshotLines = new Array();
+}
+
+screenshot(){
+  console.log("SCREENSHOT PLEASE")
+  var screenshot;
+  if (window.navigator.msSaveBlob) {
+    screenshot = window.navigator.msSaveBlob(this.canvas.msToBlob(), fileName);
+  } else {
+    screenshot =  this.canvas.toDataURL();
+  }
+  //  console.log(screenshot)
+return screenshot;
+}
+
+initCanvas(){
+  this.canvas = this.$.scratchpad;
+  this.canvas.width  = 640;
+  this.canvas.height = 360;
+  this.ctx = this.canvas.getContext('2d');
+  this.ctx.lineCap = 'round';
+  this.ctx.lineJoin = 'round';
+  this.ctx.fillStyle = "white";
+  this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  this.infos = [];
+  this.push('infos', {nom:'window width', valeur: window.innerWidth})
+  this.push('infos', {nom:'window width', valeur: window.innerHeight})
+  this.push('infos', {nom:'canvas width', valeur: this.canvas.width})
+  this.push('infos', {nom:'canvas height', valeur: this.canvas.height})
+  console.log(this.infos)
+}
+
+hslToRgb(hue, sat, light) {
+  var sat = 0.93
+  var light = 0.47;
+  var t1, t2, r, g, b;
+  hue = hue / 60;
+  if ( light <= 0.5 ) {
+    t2 = light * (sat + 1);
+  } else {
+    t2 = light + sat - (light * sat);
+  }
+  t1 = light * 2 - t2;
+  r = Math.round(this.hueToRgb(t1, t2, hue + 2) * 255);
+  g = Math.round(this.hueToRgb(t1, t2, hue) * 255);
+  b = Math.round(this.hueToRgb(t1, t2, hue - 2) * 255);
+  //return {r : r, g : g, b : b};
+  return this.rgbToHex(r,g,b);
+}
+
+hueToRgb(t1, t2, hue) {
+  if (hue < 0) hue += 6;
+  if (hue >= 6) hue -= 6;
+  if (hue < 1) return (t2 - t1) * hue + t1;
+  else if(hue < 3) return t2;
+  else if(hue < 4) return (t2 - t1) * (4 - hue) + t1;
+  else return t1;
+}
+
+componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+rgbToHex(r, g, b) {
+  return "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
+}
+
+colorChanged(){
+  var app = this;
+  if(this.colors.length> 0){
+    //  console.log(this.colors)
+    var existe = this.colors.includes(this.color);
+    if (!existe){
+      this.unshift('colors', this.color);
+      this.pop('colors');
+      var el = document.createElement('button');
+      el.dataset.color = this.color;
+      el.style.background = this.color;
+      el.addEventListener('click', function() {
+        app.set('color',this.dataset.color);
+      });
+      this.colorToolbar.insertBefore(el, this.colorToolbar.firstChild);
+      this.colorToolbar.removeChild(this.colorToolbar.lastChild);
+    }
+    //  console.log(this.colors);
+  }
+
+}
+
+
+}
+
+window.customElements.define(YdcApp.is, YdcApp);
+</script>
+</dom-module>
