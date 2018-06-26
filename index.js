@@ -65,16 +65,28 @@ io.on('connection', function(socket) {
   });
 
   socket.on('screenshot', function(dataUrl){
-    if (dataUrl != lastScreenshot){
-      lastScreenshot=dataUrl;
-      var filename = screenshotDir+"/screenshot_"+Date.now()+".png";
-      var matches = dataUrl.match(/^data:.+\/(.+);base64,(.*)$/);
-      var buffer = new Buffer(matches[2], 'base64');
-      fs.writeFileSync(filename, buffer);
-      updateGalerie(socket);
-    }else{
-      //  console.log('screenshot identique')
+
+    try {
+      if (dataUrl != lastScreenshot){
+        lastScreenshot=dataUrl;
+        var filename = screenshotDir+"/screenshot_"+Date.now()+".png";
+        var matches = dataUrl.match(/^data:.+\/(.+);base64,(.*)$/);
+        var buffer = new Buffer(matches[2], 'base64');
+        fs.writeFileSync(filename, buffer);
+        updateGalerie(socket);
+      }else{
+        //  console.log('screenshot identique')
+      }
     }
+    catch(error) {
+      console.error(error);
+      // expected output: SyntaxError: unterminated string literal
+      // Note - error messages will vary depending on browser
+    }
+
+
+
+
   });
 
   socket.on('disconnect', function(data) {
