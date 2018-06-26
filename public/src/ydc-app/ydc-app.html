@@ -296,10 +296,15 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
         download.setAttribute('download', fileName);
         download.setAttribute('href', screenshot);
       }
-      app.socket.emit('screenshot', screenshot);
+      app.emitScreenshotIfNotHeroku(app, screenshot)
     }
     download.addEventListener('click', onClickAnchor);
   }
+
+emitScreenshotIfNotHeroku(app,screenshot){
+  var host = window.location.host.split('.')[1] ;
+      app.socket.emit('screenshot', screenshot, host);
+}
 
   line(start, end, size, color) {
     var ctx = this.ctx;

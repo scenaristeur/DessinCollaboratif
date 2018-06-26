@@ -6,8 +6,6 @@
     "lazy-imports": "^2.1.0",
     "color-picker": "fooloomanzoo/color-picker#^2.0.8",
     "paper-button": "^2.1.1",
-    "input-picker-pattern": "fooloomanzoo/input-picker-pattern#^2.3.8",
-    "property-mixins": "fooloomanzoo/property-mixins#^2.5.1",
     "color-input": "fooloomanzoo/color-input#^2.1.5"
   },
   "devDependencies": {

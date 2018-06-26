@@ -64,29 +64,30 @@ io.on('connection', function(socket) {
     Array.prototype.push.apply(snapshot.lines,data);
   });
 
-  socket.on('screenshot', function(dataUrl){
+  socket.on('screenshot', function(dataUrl, host){
 
-    try {
-      if (dataUrl != lastScreenshot){
-        lastScreenshot=dataUrl;
-        var filename = screenshotDir+"/screenshot_"+Date.now()+".png";
-        var matches = dataUrl.match(/^data:.+\/(.+);base64,(.*)$/);
-        var buffer = new Buffer(matches[2], 'base64');
-        fs.writeFileSync(filename, buffer);
-        updateGalerie(socket);
-      }else{
-        //  console.log('screenshot identique')
+    if (dataUrl != lastScreenshot){
+      lastScreenshot=dataUrl;
+      if (host != "heroku"){
+        try {
+          var filename = screenshotDir+"/screenshot_"+Date.now()+".png";
+          var matches = dataUrl.match(/^data:.+\/(.+);base64,(.*)$/);
+          var buffer = new Buffer(matches[2], 'base64');
+          fs.writeFileSync(filename, buffer);
+          updateGalerie(socket);
+        }
+        catch(error) {
+          console.error(error);
+          // expected output: SyntaxError: unterminated string literal
+          // Note - error messages will vary depending on browser
+        }
       }
+      else{
+        console.log("enregistrement impossible sur heroku")
+      }
+    }else{
+      //  console.log('screenshot identique')
     }
-    catch(error) {
-      console.error(error);
-      // expected output: SyntaxError: unterminated string literal
-      // Note - error messages will vary depending on browser
-    }
-
-
-
-
   });
 
   socket.on('disconnect', function(data) {
