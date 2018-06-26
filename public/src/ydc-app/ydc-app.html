@@ -275,7 +275,7 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
 
     window.onbeforeunload = function(){
       var screenshot =   app.screenshot();
-      app.socket.emit('screenshot', screenshot);
+      app.emitScreenshotIfNotHeroku(app, screenshot)
       return "Voulez-vous vraiment quitter ? N'oubliez pas de partager votre oeuvre";
     };
 
@@ -518,7 +518,7 @@ emitScreenshotIfNotHeroku(app,screenshot){
 
     app.socket.on('screenshot', function() {
       var screenshot = app.screenshot();
-      app.socket.emit('screenshot', screenshot);
+    app.emitScreenshotIfNotHeroku(app, screenshot)
     });
 
     app.socket.on('lastScreenshot', function(strDataURI){
