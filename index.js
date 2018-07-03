@@ -3,6 +3,17 @@ var limite_synchro = 3; // gestion synchro si num_clients > limite_synchro
 var screenshotDelay = 60000; // 60000 = screenshot toutes les minutes
 var screenshotDir = "public/screenshots";
 
+
+var Twitter = require('twitter');
+//var client = new Twitter(config);
+//console.log(client)
+var client = new Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+});
+
 var fs = require('fs');
 var express = require('express');
 var app = express();
@@ -70,6 +81,10 @@ console.log(socket.id)
 
     if (dataUrl != lastScreenshot){
       lastScreenshot=dataUrl;
+      if (client.options.consumer_key != ""){
+        postTwitter(dataUrl)
+      }
+
       if (host != "heroku"){
         try {
           var filename = screenshotDir+"/screenshot_"+Date.now()+".png";
@@ -188,4 +203,34 @@ function getFiles (dir, files_){
     }
   }
   return files_;
+}
+
+function postTwitter(data){
+
+  // Make post request on media endpoint. Pass file data as media parameter
+client.post('media/upload', {media: data}, function(error, media, response) {
+
+  if (!error) {
+
+    // If successful, a media object will be returned.
+    console.log(media);
+
+    // Lets tweet it
+    var status = {
+      status: 'I am a tweet',
+      media_ids: media.media_id_string // Pass the media id string
+    }
+
+    client.post('statuses/update', status, function(error, tweet, response) {
+      if (!error) {
+        console.log(tweet);
+      }else{
+        console.log(error)
+      }
+    });
+
+  }else{
+    console.log(error)
+  }
+});
 }

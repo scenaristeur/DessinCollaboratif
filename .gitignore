@@ -61,3 +61,6 @@ typings/
 .next
 # cacher screenshots
 public/screenshots
+
+# cacher config twitter
+config.js
