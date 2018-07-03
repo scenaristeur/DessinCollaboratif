@@ -89,16 +89,17 @@
     <div id="main" hidden$="{{showslideshow}}">
       <color-picker
       id="colorpicker"
+       hidden$="{{moving}}"
       autoconfirm
       native
       value="{{color}}">
     </color-picker>
-    <paper-button id="slideshowBtn" raised id="slide" on-tap="_showGalerie">Galerie</paper-button>
-    <paper-button id="fullBtn" raised id="full" on-tap="fullscreen">full</paper-button>
-    <aside class="toolbar" id="colortoolbar"></aside>
+    <paper-button id="slideshowBtn"  hidden$="{{moving}}" raised id="slide" on-tap="_showGalerie">Galerie</paper-button>
+  <!--  <paper-button id="fullBtn" hidden$="{{moving}}" raised id="full" on-tap="fullscreen">full</paper-button> -->
+    <aside class="toolbar" hidden$="{{moving}}" id="colortoolbar"></aside>
     <canvas id="canvas" > </canvas>
-    <aside class="toolbar" id="sizetoolbar"></aside>
-    <footer id="footer">
+    <aside class="toolbar" hidden$="{{moving}}" id="sizetoolbar"></aside>
+    <footer id="footer" hidden$="{{moving}}">
       <table>
         <tr>
           <td>
@@ -106,6 +107,7 @@
             <a href="/screenshots/"  target="_blank"><button align="center">Gal</button></a>
           </td>
           <td id="footercredits">
+            {{moving}}
             Users : <span id="counterSpan">{{counter}} / {{typeSync}} / {{galeryFiles.length}}</span> &middot;<br>
             inspired by <a href="https://github.com/hejmsdz/sketchpad">sketchpad</a> &middot;<br>
             Forked by scenaristeur at <a href="https://github.com/scenaristeur/lininoapps/tree/master/root/ydc">scenaristeur/ydc</a>
@@ -136,7 +138,6 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
       },
       status: {
         type: String,
-        notify: true,
         observer: '_consoleStatus'
       },
       socket: {Object,
@@ -168,7 +169,7 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
   constructor(){
     super();
     this._resize = this.resizeCanvas.bind(this);
-    this.connectSocket();
+
     Polymer.RenderStatus.afterNextRender(this, function() {
       this._deferred();
     });
@@ -178,7 +179,8 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
     this.importLazyGroup('lazy').then((results) => {
       this.dispatchEvent(new CustomEvent('import-loaded', results));
     });
-    this.socket = io();
+  //  this.socket = io();
+
     this.sizeToolbar = this.$.sizetoolbar;
     this.colorToolbar = this.$.colortoolbar;
     var oldPos = {};
@@ -220,14 +222,16 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
 
     function handleStart(e) {
       oldPos = eventToXY(e);
+
       handleMove(e); // draw a single point
     }
 
     function handleMove(e) {
+      app.moving = true;
       var newPos = eventToXY(e);
       var data = {
         start: {x: oldPos.x/app.canvas.width, y: oldPos.y/app.canvas.height},
-        end: {x: oldPos.x/app.canvas.width, y: oldPos.y/app.canvas.height},
+        end: {x: newPos.x/app.canvas.width, y: newPos.y/app.canvas.height},
         size: size,
         color: app.color
       };
@@ -237,6 +241,7 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
     };
 
     function handleEnd(e) {
+      app.moving = false;
       oldPos = {};
     }
 
@@ -299,6 +304,8 @@ class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
       app.emitScreenshotIfNotHeroku(app, screenshot)
     }
     download.addEventListener('click', onClickAnchor);
+
+      this.connectSocket();
   }
 
 emitScreenshotIfNotHeroku(app,screenshot){
@@ -307,6 +314,7 @@ emitScreenshotIfNotHeroku(app,screenshot){
 }
 
   line(start, end, size, color) {
+      //    console.log(start, end)
     var ctx = this.ctx;
     var oldSize = ctx.lineWidth;
     var oldColor = ctx.fillStyle;
@@ -498,8 +506,10 @@ emitScreenshotIfNotHeroku(app,screenshot){
     });
     // mode sync
     app.socket.on('line', function(data) {
+
       var start= {x: data.start.x*app.canvas.width, y: data.start.y*app.canvas.height };
       var end = {x: data.end.x*app.canvas.width, y: data.end.y*app.canvas.height };
+
       app.line(start, end, data.size, data.color);
     });
     //mode async

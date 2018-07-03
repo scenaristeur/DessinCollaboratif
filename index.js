@@ -1,5 +1,5 @@
 // personnalisation
-var limite_synchro = 10; // gestion synchro si num_clients > limite_synchro
+var limite_synchro = 3; // gestion synchro si num_clients > limite_synchro
 var screenshotDelay = 60000; // 60000 = screenshot toutes les minutes
 var screenshotDir = "public/screenshots";
 
@@ -13,7 +13,7 @@ var port = process.env.PORT || 3010;
 
 var num_clients = 0;
 var tickInterval;
-var tickDelay = 15; // 15ms selon source, tempo pour envoi du snapshot par le serveur
+var tickDelay = 150; // 15ms selon source, tempo pour envoi du snapshot par le serveur
 
 var typeSync;
 var snapshot = {
@@ -41,7 +41,7 @@ io.on('connection', function(socket) {
   if (num_clients == 1){
     startScreenshots()
   }
-
+console.log(socket.id)
   var precedentSreenshot = lastScreenshot;
   updateTypeSync()
   askForScreenshot()
@@ -52,6 +52,7 @@ io.on('connection', function(socket) {
   }
 
   socket.on('line', function(data) {
+  //  console.log(data)
     //s'il n'y a pas trop d'utilisateurs, on synchronise en direct, sinon on décalle
     if (typeSync == "sync" ){
       socket.broadcast.emit('line', data);
@@ -61,6 +62,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('snapshotLines', function(data){
+  //  console.log(data)
     Array.prototype.push.apply(snapshot.lines,data);
   });
 
