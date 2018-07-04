@@ -7,7 +7,7 @@ var screenshotDir = "public/screenshots";
 var Twitter = require('twit');
 var client;
 
-if (process.env.TWITTER_CONSUMER_KEY != null){
+//if (process.env.TWITTER_CONSUMER_KEY != null){
   // utilisation des variables env du serveur
   client = new Twitter({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
@@ -15,13 +15,13 @@ if (process.env.TWITTER_CONSUMER_KEY != null){
     access_token: process.env.TWITTER_ACCESS_TOKEN,
     access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
   });
-}else{
+/*}else{
   //utilisation du fichier de config rename_toconfig.js à renommer en config.js et a completer selon les donnees de https://apps.twitter.com
   // voir https://www.npmjs.com/package/twitter
   var config = require('./config.js');
   client = new Twitter(config);
 
-}
+}*/
 //}
 
 /*client.post('statuses/update', { status: 'hello world!' }, function(err, data, response) {
