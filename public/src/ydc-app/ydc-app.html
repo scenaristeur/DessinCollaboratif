@@ -56,6 +56,11 @@
       right: 150px;
       top: 15px;
     }
+    #twitterBtn {
+      position: fixed;
+      left: 150px;
+      top: 15px;
+    }
     #slideshowBtn {
       position: fixed;
       right: 250px;
@@ -94,7 +99,11 @@
       native
       value="{{color}}">
     </color-picker>
+
+
     <paper-button id="slideshowBtn"  hidden$="{{moving}}" raised id="slide" on-tap="_showGalerie">Galerie</paper-button>
+    <paper-button id="twitterBtn"  hidden$="{{moving}}" raised >
+      <a href="https://twitter.com/DCollaboratif" target="_blank" >Gallerie Twitter</a></paper-button>
   <!--  <paper-button id="fullBtn" hidden$="{{moving}}" raised id="full" on-tap="fullscreen">full</paper-button> -->
     <aside class="toolbar" hidden$="{{moving}}" id="colortoolbar"></aside>
     <canvas id="canvas" > </canvas>

@@ -7,25 +7,25 @@ var screenshotDir = "public/screenshots";
 var Twitter = require('twit');
 var client;
 
-  /*var config = require('./config.js');
-  client = new Twitter(config);*/
-
+if (process.env.TWITTER_CONSUMER_KEY != null){
+  // utilisation des variables env du serveur
   client = new Twitter({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
     consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
     access_token: process.env.TWITTER_ACCESS_TOKEN,
     access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
   });
+}else{
+  //utilisation du fichier de config rename_toconfig.js à renommer en config.js et a completer selon les donnees de https://apps.twitter.com
+  // voir https://www.npmjs.com/package/twitter
+  var config = require('./config.js');
+  client = new Twitter(config);
+
 }
-//console.log(client.id)
-
-
-
-
-
+//}
 
 /*client.post('statuses/update', { status: 'hello world!' }, function(err, data, response) {
-  console.log(data)
+console.log(data)
 
 })*/
 
@@ -67,7 +67,7 @@ io.on('connection', function(socket) {
   if (num_clients == 1){
     startScreenshots()
   }
-console.log(socket.id)
+  console.log(socket.id)
   var precedentSreenshot = lastScreenshot;
   updateTypeSync()
   askForScreenshot()
@@ -78,7 +78,7 @@ console.log(socket.id)
   }
 
   socket.on('line', function(data) {
-  //  console.log(data)
+    //  console.log(data)
     //s'il n'y a pas trop d'utilisateurs, on synchronise en direct, sinon on décalle
     if (typeSync == "sync" ){
       socket.broadcast.emit('line', data);
@@ -88,7 +88,7 @@ console.log(socket.id)
   });
 
   socket.on('snapshotLines', function(data){
-  //  console.log(data)
+    //  console.log(data)
     Array.prototype.push.apply(snapshot.lines,data);
   });
 
@@ -221,40 +221,40 @@ function getFiles (dir, files_){
 }
 
 function postTwitter(dataUrl){
-console.log("post")
-var matches = dataUrl.match(/^data:.+\/(.+);base64,(.*)$/);
-var buffer = new Buffer.from(matches[2], 'base64');
-//fs.writeFileSync(filename, buffer);
-//console.log("post 1")
-//var b64content = fs.createReadStream(dataUrl, { encoding: 'base64' })
-/*client.post('statuses/update', { status: 'hello world!' }, function(err, data, response) {
+  console.log("post")
+  var matches = dataUrl.match(/^data:.+\/(.+);base64,(.*)$/);
+  var buffer = new Buffer.from(matches[2], 'base64');
+  //fs.writeFileSync(filename, buffer);
+  //console.log("post 1")
+  //var b64content = fs.createReadStream(dataUrl, { encoding: 'base64' })
+  /*client.post('statuses/update', { status: 'hello world!' }, function(err, data, response) {
   console.log(data)
 
 })*/
-  client.post('media/upload', { media_data: buffer.toString('base64') }, function (err, data, response) {
-    // now we can assign alt text to the media, for use by screen readers and
-    // other text-based presentations and interpreters
+client.post('media/upload', { media_data: buffer.toString('base64') }, function (err, data, response) {
+  // now we can assign alt text to the media, for use by screen readers and
+  // other text-based presentations and interpreters
   //  console.log("post 2")
-    console.log(data)
-    //console.log("post 3")
-    var mediaIdStr = data.media_id_string
-    var altText = "https://dessincollaboratif.herokuapp.com/"
-    var meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
-//console.log(meta_params)
-//console.log("post 4")
-    client.post('media/metadata/create', meta_params, function (err, data, response) {
+  console.log(data)
+  //console.log("post 3")
+  var mediaIdStr = data.media_id_string
+  var altText = "https://dessincollaboratif.herokuapp.com/"
+  var meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
+  //console.log(meta_params)
+  //console.log("post 4")
+  client.post('media/metadata/create', meta_params, function (err, data, response) {
     //  console.log("post 5")
-      if (!err) {
-        // now we can reference the media and post a tweet (media will attach to the tweet)
-        var params = { status: ' #dessin #collaboratif  \n sur https://dessincollaboratif.herokuapp.com/ proposé par @DCollaboratif', media_ids: [mediaIdStr] }
-//console.log("post 6")
-        client.post('statuses/update', params, function (err, data, response) {
-          console.log(data)
-  //        console.log("post 7")
-        })
-      }else{
-    //    console.log(err)
-      }
-    })
+    if (!err) {
+      // now we can reference the media and post a tweet (media will attach to the tweet)
+      var params = { status: ' #dessin #collaboratif  \n sur https://dessincollaboratif.herokuapp.com/ proposé par @DCollaboratif', media_ids: [mediaIdStr] }
+      //console.log("post 6")
+      client.post('statuses/update', params, function (err, data, response) {
+        console.log(data)
+        //        console.log("post 7")
+      })
+    }else{
+      //    console.log(err)
+    }
   })
+})
 }
