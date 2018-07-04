@@ -1,18 +1,26 @@
 // personnalisation
 var limite_synchro = 3; // gestion synchro si num_clients > limite_synchro
-var screenshotDelay = 60000; // 60000 = screenshot toutes les minutes
+var screenshotDelay = 300000; // 60000 = screenshot toutes les minutes
 var screenshotDir = "public/screenshots";
 
 
 var Twitter = require('twit');
-//var client = new Twitter(config);
-//console.log(client)
-var client = new Twitter({
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token: process.env.TWITTER_ACCESS_TOKEN,
-  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
-});
+var client;
+try{
+  var config = require('./config.js');
+  client = new Twitter(config);
+}catch(e){
+  console.log(e)
+  client = new Twitter({
+    consumer_key: process.env.TWITTER_CONSUMER_KEY,
+    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    access_token: process.env.TWITTER_ACCESS_TOKEN,
+    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+  });
+}
+
+
+
 
 
 
@@ -238,7 +246,7 @@ var buffer = new Buffer.from(matches[2], 'base64');
     //  console.log("post 5")
       if (!err) {
         // now we can reference the media and post a tweet (media will attach to the tweet)
-        var params = { status: 'https://dessincollaboratif.herokuapp.com/ #dessin #collaboratif', media_ids: [mediaIdStr] }
+        var params = { status: ' #dessin #collaboratif  \n sur https://dessincollaboratif.herokuapp.com/ proposé par @DCollaboratif', media_ids: [mediaIdStr] }
 //console.log("post 6")
         client.post('statuses/update', params, function (err, data, response) {
           console.log(data)
