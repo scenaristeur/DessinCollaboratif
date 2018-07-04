@@ -5,14 +5,22 @@ var screenshotDir = "public/screenshots";
 
 
 var Twitter = require('twit');
-//var client = new Twitter(config);
-//console.log(client)
-var client = new Twitter({
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token: process.env.TWITTER_ACCESS_TOKEN,
-  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
-});
+
+var client
+if (process.env.TWITTER_CONSUMER_KEY != null){
+  client = new Twitter({
+    consumer_key: process.env.TWITTER_CONSUMER_KEY,
+    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    access_token: process.env.TWITTER_ACCESS_TOKEN,
+    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+  });
+}else{
+  var config = require('./config.js');
+  client = new Twitter(config);
+  //console.log(client)
+}
+
+
 
 
 
