@@ -4,15 +4,22 @@ var screenshotDelay = 60000; // 60000 = screenshot toutes les minutes
 var screenshotDir = "public/screenshots";
 
 
-var Twitter = require('twitter');
+var Twitter = require('twit');
 //var client = new Twitter(config);
 //console.log(client)
 var client = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token: process.env.TWITTER_ACCESS_TOKEN,
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 });
+
+
+
+/*client.post('statuses/update', { status: 'hello world!' }, function(err, data, response) {
+  console.log(data)
+
+})*/
 
 var fs = require('fs');
 var express = require('express');
@@ -81,7 +88,7 @@ console.log(socket.id)
 
     if (dataUrl != lastScreenshot){
       lastScreenshot=dataUrl;
-      if (client.options.consumer_key != ""){
+      if (client.id != ""){
         postTwitter(dataUrl)
       }
 
@@ -89,7 +96,7 @@ console.log(socket.id)
         try {
           var filename = screenshotDir+"/screenshot_"+Date.now()+".png";
           var matches = dataUrl.match(/^data:.+\/(.+);base64,(.*)$/);
-          var buffer = new Buffer(matches[2], 'base64');
+          var buffer = new Buffer.from(matches[2], 'base64');
           fs.writeFileSync(filename, buffer);
           updateGalerie(socket);
         }
@@ -205,32 +212,41 @@ function getFiles (dir, files_){
   return files_;
 }
 
-function postTwitter(data){
+function postTwitter(dataUrl){
+console.log("post")
+var matches = dataUrl.match(/^data:.+\/(.+);base64,(.*)$/);
+var buffer = new Buffer.from(matches[2], 'base64');
+//fs.writeFileSync(filename, buffer);
+//console.log("post 1")
+//var b64content = fs.createReadStream(dataUrl, { encoding: 'base64' })
+/*client.post('statuses/update', { status: 'hello world!' }, function(err, data, response) {
+  console.log(data)
 
-  // Make post request on media endpoint. Pass file data as media parameter
-client.post('media/upload', {media: data}, function(error, media, response) {
-
-  if (!error) {
-
-    // If successful, a media object will be returned.
-    console.log(media);
-
-    // Lets tweet it
-    var status = {
-      status: 'I am a tweet',
-      media_ids: media.media_id_string // Pass the media id string
-    }
-
-    client.post('statuses/update', status, function(error, tweet, response) {
-      if (!error) {
-        console.log(tweet);
+})*/
+  client.post('media/upload', { media_data: buffer.toString('base64') }, function (err, data, response) {
+    // now we can assign alt text to the media, for use by screen readers and
+    // other text-based presentations and interpreters
+  //  console.log("post 2")
+    console.log(data)
+    //console.log("post 3")
+    var mediaIdStr = data.media_id_string
+    var altText = "https://dessincollaboratif.herokuapp.com/"
+    var meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
+//console.log(meta_params)
+//console.log("post 4")
+    client.post('media/metadata/create', meta_params, function (err, data, response) {
+    //  console.log("post 5")
+      if (!err) {
+        // now we can reference the media and post a tweet (media will attach to the tweet)
+        var params = { status: 'https://dessincollaboratif.herokuapp.com/ #dessin #collaboratif', media_ids: [mediaIdStr] }
+//console.log("post 6")
+        client.post('statuses/update', params, function (err, data, response) {
+          console.log(data)
+  //        console.log("post 7")
+        })
       }else{
-        console.log(error)
+    //    console.log(err)
       }
-    });
-
-  }else{
-    console.log(error)
-  }
-});
+    })
+  })
 }
