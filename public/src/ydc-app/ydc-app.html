@@ -10,553 +10,553 @@
 <dom-module id="ydc-app">
   <link rel="lazy-import" group="lazy"  href="../../bower_components/color-picker/color-picker.html">
   <link rel="lazy-import" group="lazy"  href="../../bower_components/color-picker/color-element.html">
-<!--  <link rel="lazy-import" group="lazy"  href="../ydc-slideshow/ydc-slideshow.html">
+  <!--  <link rel="lazy-import" group="lazy"  href="../ydc-slideshow/ydc-slideshow.html">
 -->  <template>
-    <style>
-    :host {
-      display: block;
-    }
-    * {
-      margin: 0;
-      padding: 0;
+<style>
+  :host {
+    display: block;
+  }
+  * {
+    margin: 0;
+    padding: 0;
     /*  overflow: hidden; */
-    }
-    body {
-      background: #ddd;
+  }
+  body {
+    background: #ddd;
+  }
+  button {
+    border: none;
+    background: #aaa;
+    width: 45px;
+    height: 45px;
+    border-radius: 30px;
+    margin: 2px;
+  }
+  #canvas {
+    top: 0;
+    left: 0;
+    background: #eee;
+    /*  box-shadow: 0 0 20px #ccc; */
+    cursor: default;
+  }
+  #footer{
+    position: fixed;
+    right: 0;
+    bottom: 15px;
+    width: 20vw;
+    right: 40px;
+  }
+  #colorpicker {
+    position: fixed;
+    right: 15px;
+    top: 15px;
+  }
+  #fullBtn {
+    position: fixed;
+    right: 150px;
+    top: 15px;
+  }
+  #twitterBtn {
+    position: fixed;
+    left: 150px;
+    top: 15px;
+  }
+  #slideshowBtn {
+    position: fixed;
+    right: 250px;
+    top: 15px;
+  }
+  #sizetoolbar {
+    position: fixed;
+    left: 15px;
+    bottom: 15px;
+  }
+  #colortoolbar {
+    position: fixed;
+    right: 15px;
+    top: 60px;
+    width: 50px;
+  }
+  #footer a {
+    color: #444;
+  }
+  @media screen and (max-height: 650px) {
+    #footercredits {
+      display: none;
     }
     button {
-      border: none;
-      background: #aaa;
-      width: 45px;
-      height: 45px;
-      border-radius: 30px;
-      margin: 2px;
+      width: 25px;
+      height: 25px;
+      right: 20;
     }
-    #canvas {
-      top: 0;
-      left: 0;
-      background: #eee;
-      /*  box-shadow: 0 0 20px #ccc; */
-      cursor: default;
-    }
-    #footer{
-      position: fixed;
-      right: 0;
-      bottom: 15px;
-      width: 20vw;
-      right: 40px;
-    }
-    #colorpicker {
-      position: fixed;
-      right: 15px;
-      top: 15px;
-    }
-    #fullBtn {
-      position: fixed;
-      right: 150px;
-      top: 15px;
-    }
-    #twitterBtn {
-      position: fixed;
-      left: 150px;
-      top: 15px;
-    }
-    #slideshowBtn {
-      position: fixed;
-      right: 250px;
-      top: 15px;
-    }
-    #sizetoolbar {
-      position: fixed;
-      left: 15px;
-      bottom: 15px;
-    }
-    #colortoolbar {
-      position: fixed;
-      right: 15px;
-      top: 60px;
-      width: 50px;
-    }
-    #footer a {
-      color: #444;
-    }
-    @media screen and (max-height: 650px) {
-      #footercredits {
-        display: none;
-      }
-      button {
-        width: 25px;
-        height: 25px;
-        right: 20;
-      }
-    }
-    </style>
-    <div id="main" hidden$="{{showslideshow}}">
-      <color-picker
-      id="colorpicker"
-       hidden$="{{moving}}"
-      autoconfirm
-      native
-      value="{{color}}">
-    </color-picker>
+  }
+</style>
+<div id="main" hidden$="{{showslideshow}}">
+  <color-picker
+  id="colorpicker"
+  hidden$="{{moving}}"
+  autoconfirm
+  native
+  value="{{color}}">
+</color-picker>
 
 
-    <paper-button id="slideshowBtn"  hidden$="{{moving}}" raised id="slide" on-tap="_showGalerie">Galerie</paper-button>
-    <paper-button id="twitterBtn"  hidden$="{{moving}}" raised >
-      <a href="https://twitter.com/DCollaboratif" target="_blank" >Gallerie Twitter</a></paper-button>
+<paper-button id="slideshowBtn"  hidden$="{{moving}}" raised id="slide" on-tap="_showGalerie">Galerie</paper-button>
+<paper-button id="twitterBtn"  hidden$="{{moving}}" raised >
+  <a href="https://twitter.com/DCollaboratif" target="_blank" >Gallerie Twitter</a></paper-button>
   <!--  <paper-button id="fullBtn" hidden$="{{moving}}" raised id="full" on-tap="fullscreen">full</paper-button> -->
-    <aside class="toolbar" hidden$="{{moving}}" id="colortoolbar"></aside>
-    <canvas id="canvas" > </canvas>
-    <aside class="toolbar" hidden$="{{moving}}" id="sizetoolbar"></aside>
-    <footer id="footer" hidden$="{{moving}}">
-      <table>
-        <tr>
-          <td>
-            <a href="#" id="download" download="image.png"><button align="center">Save</button></a>
-            <a href="/screenshots/"  target="_blank"><button align="center">Gal</button></a>
-          </td>
-          <td id="footercredits">
-            {{moving}}
-            Users : <span id="counterSpan">{{counter}} / {{typeSync}} / {{galeryFiles.length}}</span> &middot;<br>
-            inspired by <a href="https://github.com/hejmsdz/sketchpad">sketchpad</a> &middot;<br>
-            Forked by scenaristeur at <a href="https://github.com/scenaristeur/DessinCollaboratif">scenaristeur/DessinCollaboratif</a>
-          </td>
-        </tr>
-      </table>
-    </footer>
-  </div>
-  <ydc-slideshow hidden$="{{!showslideshow}}" showslideshow="{{showslideshow}}" files="[[galeryFiles]]"> ></ydc-slideshow>
+  <aside class="toolbar" hidden$="{{moving}}" id="colortoolbar"></aside>
+  <canvas id="canvas" > </canvas>
+  <aside class="toolbar" hidden$="{{moving}}" id="sizetoolbar"></aside>
+  <footer id="footer" hidden$="{{moving}}">
+    <table>
+      <tr>
+        <td>
+          <a href="#" id="download" download="image.png"><button align="center">Save</button></a>
+          <a href="/screenshots/"  target="_blank"><button align="center">Gal</button></a>
+        </td>
+        <td id="footercredits">
+          {{moving}}
+          Users : <span id="counterSpan">{{counter}} / {{typeSync}} / {{galeryFiles.length}}</span> &middot;<br>
+          inspired by <a href="https://github.com/hejmsdz/sketchpad">sketchpad</a> &middot;<br>
+          Forked by scenaristeur at <a href="https://github.com/scenaristeur/DessinCollaboratif">scenaristeur/DessinCollaboratif</a>
+        </td>
+      </tr>
+    </table>
+  </footer>
+</div>
+<ydc-slideshow hidden$="{{!showslideshow}}" showslideshow="{{showslideshow}}" files="[[galeryFiles]]"> ></ydc-slideshow>
 </template>
 
 <script>
-/**
-* @customElement
-* @polymer
-*/
-class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
-  static get is() { return 'ydc-app'; }
-  static get properties() {
-    return {
-      showslideshow:{
-        type: Boolean,
-        value: false,
-        notify: true
-      },
-      canvas: {
-        type: Object
-      },
-      status: {
-        type: String,
-        observer: '_consoleStatus'
-      },
-      socket: {Object,
-        notify: true
-      },
-      retry: {
-        type: Number,
-        value:10
-      },
-      colors: {
-        type: Array,
-        value: []
-      },
-      color: {
-        type: Object,
-        value: '#000000',
-        observer: "colorChanged"
-      },
-      snapshotLines: {
-        type: Array,
-        value: []
-      },
-      tickDelay: {
-        type: Number,
-        value: 1000
-      },
-    };
-  }
-  constructor(){
-    super();
-    this._resize = this.resizeCanvas.bind(this);
-
-    Polymer.RenderStatus.afterNextRender(this, function() {
-      this._deferred();
-    });
-  }
-  _deferred(){
-    var app = this;
-    this.importLazyGroup('lazy').then((results) => {
-      this.dispatchEvent(new CustomEvent('import-loaded', results));
-    });
-  //  this.socket = io();
-
-    this.sizeToolbar = this.$.sizetoolbar;
-    this.colorToolbar = this.$.colortoolbar;
-    var oldPos = {};
-    var size = 4;
-    this.initCanvas();
-    // populate the toolbars
-    for (var i=.5; i<10; i++) {
-      var lineSize = Math.round(i*2);
-      var el = document.createElement('button');
-      el.innerHTML = lineSize;
-      el.dataset.size = lineSize;
-      el.addEventListener('click', function() {
-        size = this.dataset.size;
-      });
-      this.sizeToolbar.appendChild(el);
-    }
-
-    this.colors = [];
-    for (var i=0; i<10; i++) {
-      var col = this.hslToRgb(36*i-6, '93%', '47%')
-      this.push('colors', col);
-    }
-    for (var i=0; i<this.colors.length; i++) {
-      var el = document.createElement('button');
-      el.dataset.color = this.colors[i];
-      el.style.background = this.colors[i];
-      el.addEventListener('click', function() {
-        app.set('color',this.dataset.color);
-      });
-      this.colorToolbar.appendChild(el);
-    }
-
-    function eventToXY(e) {
+  /**
+  * @customElement
+  * @polymer
+  */
+  class YdcApp extends Polymer.LazyImportsMixin(Polymer.Element) {
+    static get is() { return 'ydc-app'; }
+    static get properties() {
       return {
-        x: e.offsetX || e.layerX || e.clientX - app.canvas.offsetLeft,
-        y: e.offsetY || e.layerY || e.clientY - app.canvas.offsetTop
+        showslideshow:{
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        canvas: {
+          type: Object
+        },
+        status: {
+          type: String,
+          observer: '_consoleStatus'
+        },
+        socket: {Object,
+          notify: true
+        },
+        retry: {
+          type: Number,
+          value:10
+        },
+        colors: {
+          type: Array,
+          value: []
+        },
+        color: {
+          type: Object,
+          value: '#000000',
+          observer: "colorChanged"
+        },
+        snapshotLines: {
+          type: Array,
+          value: []
+        },
+        tickDelay: {
+          type: Number,
+          value: 1000
+        },
       };
     }
+    constructor(){
+      super();
+      this._resize = this.resizeCanvas.bind(this);
 
-    function handleStart(e) {
-      oldPos = eventToXY(e);
-
-      handleMove(e); // draw a single point
+      Polymer.RenderStatus.afterNextRender(this, function() {
+        this._deferred();
+      });
     }
+    _deferred(){
+      var app = this;
+      this.importLazyGroup('lazy').then((results) => {
+        this.dispatchEvent(new CustomEvent('import-loaded', results));
+      });
+      //  this.socket = io();
 
-    function handleMove(e) {
-      app.moving = true;
-      var newPos = eventToXY(e);
-      var data = {
-        start: {x: oldPos.x/app.canvas.width, y: oldPos.y/app.canvas.height},
-        end: {x: newPos.x/app.canvas.width, y: newPos.y/app.canvas.height},
-        size: size,
-        color: app.color
-      };
-      app.sendLines(data);
-      app.line(oldPos, newPos, size, app.color);
-      oldPos = newPos;
-    };
-
-    function handleEnd(e) {
-      app.moving = false;
-      oldPos = {};
-    }
-
-    app.canvas.addEventListener('mousedown', function(e) {
-      if (e.which == 1) {
-        handleStart(e);
-      }
-    });
-
-    app.canvas.addEventListener('mousemove', function(e) {
-      e.preventDefault();
-      if (e.buttons & 1) {
-        handleMove(e);
-      }
-    });
-
-    app.canvas.addEventListener('mouseout', handleEnd);
-
-    app.canvas.addEventListener('touchstart', function(e) {
-      var touches = e.touches;
-      if (touches.length == 1) {
-        handleStart(touches[0]);
-      }
-    });
-
-    app.canvas.addEventListener('touchmove', function(e) {
-      e.preventDefault();
-      var touches = e.touches;
-      if (touches.length == 1) {
-        //  console.log(eventToXY(touches[0]));
-        handleMove(touches[0]);
-      }
-    });
-
-    app.canvas.addEventListener('touchend', handleEnd);
-
-    window.onbeforeunload = function(){
-      var screenshot =   app.screenshot();
-      app.emitScreenshotIfNotHeroku(app, screenshot)
-      return "Voulez-vous vraiment quitter ? N'oubliez pas de partager votre oeuvre";
-    };
-
-    // download
-    const download = this.$.download;
-    const rand = i=>Math.random()*i<<0;
-    const fileName = `image${100+rand(100)}.png`;
-
-    function onClickAnchor(e) {
-      app.canvas.style.backgroundColor = 'rgba(255,255,255)';
-      var screenshot;
-      if (window.navigator.msSaveBlob) {
-        screenshot = app.canvas.msToBlob()
-        window.navigator.msSaveBlob(screenshot, fileName);
-        e.preventDefault();
-      } else {
-        screenshot = app.canvas.toDataURL();
-        download.setAttribute('download', fileName);
-        download.setAttribute('href', screenshot);
-      }
-      app.emitScreenshotIfNotHeroku(app, screenshot)
-    }
-    download.addEventListener('click', onClickAnchor);
-
-      this.connectSocket();
-  }
-
-emitScreenshotIfNotHeroku(app,screenshot){
-  var host = window.location.host.split('.')[1] ;
-      app.socket.emit('screenshot', screenshot, host);
-}
-
-  line(start, end, size, color) {
-      //    console.log(start, end)
-    var ctx = this.ctx;
-    var oldSize = ctx.lineWidth;
-    var oldColor = ctx.fillStyle;
-    ctx.lineWidth = size;
-    ctx.strokeStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(end.x, end.y);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.lineWidth = oldSize;
-    ctx.strokeStyle = oldColor;
-  }
-
-  launchAsync(tickDelay){
-    var app = this;
-    //async
-    app.tickInterval = setInterval(function() {
-      if(app.snapshotLines.length >0){
-        app.sendSnaphotLines();
-      }
-    }, tickDelay);
-  }
-
-  sendLines(data){
-    if (this.typeSync == "sync"){
-      this.socket.emit('line', data);
-    }else{
-      this.push('snapshotLines', data);
-    }
-  }
-
-  sendSnaphotLines(){
-    this.socket.emit('snapshotLines', this.snapshotLines);
-    this.snapshotLines = new Array();
-  }
-
-  screenshot(){
-    console.log("SCREENSHOT PLEASE")
-    var screenshot;
-    if (window.navigator.msSaveBlob) {
-      screenshot = window.navigator.msSaveBlob(this.canvas.msToBlob(), fileName);
-    } else {
-      screenshot =  this.canvas.toDataURL();
-    }
-    return screenshot;
-  }
-
-  initCanvas(){
-    var app = this;
-    this.canvas = this.$.canvas
-    if (this.canvas.getContext) {
-      this.ctx = this.canvas.getContext("2d");
-    }
-    this.ctx.lineCap = 'round';
-    this.ctx.lineJoin = 'round';
-    this.ctx.fillStyle = "white";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.canvas=this.$.canvas;
-    window.addEventListener('resize', this._resize, false);
-    window.addEventListener('orientationchange', this._resize, false);
-    this._resize();
-  }
-
-  resizeCanvas() {
-    this.canvas = this.$.canvas;
-    var tempCanvas = document.createElement('canvas');
-    tempCanvas.id = "tempCanvas"
-    tempCanvas.width = this.canvas.width;
-    tempCanvas.height = this.canvas.height;
-    var tmpCtx = tempCanvas.getContext('2d');
-    // Copy to temporary canvas
-    tmpCtx.drawImage(this.canvas, 0, 0);
-    // Resize original canvas
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-    // Copy back to resized canvas
-    this.ctx = this.canvas.getContext('2d');
-    this.ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  hslToRgb(hue, sat, light) {
-    var sat = 0.93
-    var light = 0.47;
-    var t1, t2, r, g, b;
-    hue = hue / 60;
-    if ( light <= 0.5 ) {
-      t2 = light * (sat + 1);
-    } else {
-      t2 = light + sat - (light * sat);
-    }
-    t1 = light * 2 - t2;
-    r = Math.round(this.hueToRgb(t1, t2, hue + 2) * 255);
-    g = Math.round(this.hueToRgb(t1, t2, hue) * 255);
-    b = Math.round(this.hueToRgb(t1, t2, hue - 2) * 255);
-    //return {r : r, g : g, b : b};
-    return this.rgbToHex(r,g,b);
-  }
-
-  hueToRgb(t1, t2, hue) {
-    if (hue < 0) hue += 6;
-    if (hue >= 6) hue -= 6;
-    if (hue < 1) return (t2 - t1) * hue + t1;
-    else if(hue < 3) return t2;
-    else if(hue < 4) return (t2 - t1) * (4 - hue) + t1;
-    else return t1;
-  }
-
-  componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
-  }
-
-  rgbToHex(r, g, b) {
-    return "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
-  }
-
-  colorChanged(){
-    var app = this;
-    if(this.colors.length> 0){
-      var existe = this.colors.includes(this.color);
-      if (!existe){
-        this.unshift('colors', this.color);
-        this.pop('colors');
+      this.sizeToolbar = this.$.sizetoolbar;
+      this.colorToolbar = this.$.colortoolbar;
+      var oldPos = {};
+      var size = 4;
+      this.initCanvas();
+      // populate the toolbars
+      for (var i=.5; i<10; i++) {
+        var lineSize = Math.round(i*2);
         var el = document.createElement('button');
-        el.dataset.color = this.color;
-        el.style.background = this.color;
+        el.innerHTML = lineSize;
+        el.dataset.size = lineSize;
+        el.addEventListener('click', function() {
+          size = this.dataset.size;
+        });
+        this.sizeToolbar.appendChild(el);
+      }
+
+      this.colors = [];
+      for (var i=0; i<10; i++) {
+        var col = this.hslToRgb(36*i-6, '93%', '47%')
+        this.push('colors', col);
+      }
+      for (var i=0; i<this.colors.length; i++) {
+        var el = document.createElement('button');
+        el.dataset.color = this.colors[i];
+        el.style.background = this.colors[i];
         el.addEventListener('click', function() {
           app.set('color',this.dataset.color);
         });
-        this.colorToolbar.insertBefore(el, this.colorToolbar.firstChild);
-        this.colorToolbar.removeChild(this.colorToolbar.lastChild);
-      }
-    }
-  }
-
-  fullscreen(){
-    console.log("full")
-    if(this.webkitRequestFullScreen) {
-      this.webkitRequestFullScreen();
-    }
-    else {
-      this.mozRequestFullScreen();
-    }
-  }
-
-  _consoleStatus(newValue, oldValue){
-    console.log(oldValue +" -> "+ newValue);
-    if(oldValue == "reconnecting" && newValue =="disconnected"){
-      this.retry --;
-      console.log(this.retry);
-      if (this.retry <= 0){
-        this.socket.disconnect();
-      }
-    }
-  }
-
-  connectSocket(connectUri, token) {
-    var app = this;
-    this.socket = io();
-    // Register listeners to expose connection status
-    this.socket.on('connect', () => this.status = 'connected');
-    this.socket.on('disconnect', () => this.status = 'disconnected');
-    this.socket.on('connect_error', () => this.status = 'disconnected');
-    this.socket.on('reconnecting', () => this.status = 'reconnecting');
-    this.socket.on('reconnect', () => this.status = 'connected');
-    this.socket.on('error', e => {
-      console.warn(`WebSocket error: ${JSON.stringify(e)}`);
-    });
-
-    // remote events
-    app.socket.on('num_clients', function(infos_clients) {
-      app.set('typeSync', infos_clients.typeSync);
-      app.set('counter', infos_clients.num_clients);
-      if(app.typeSync == 'async'){
-        app.launchAsync(infos_clients.tickDelay);
-      }else{
-        if(app.snapshotLines.length >0){
-          app.io.emit('snapshotLines', app.snapshotLines);
-          app.snapshotLines = new Array();
-        }
-        clearInterval(app.tickInterval);
+        this.colorToolbar.appendChild(el);
       }
 
-    });
-    // mode sync
-    app.socket.on('line', function(data) {
+      function eventToXY(e) {
+        return {
+          x: e.offsetX || e.layerX || e.clientX - app.canvas.offsetLeft,
+          y: e.offsetY || e.layerY || e.clientY - app.canvas.offsetTop
+        };
+      }
 
-      var start= {x: data.start.x*app.canvas.width, y: data.start.y*app.canvas.height };
-      var end = {x: data.end.x*app.canvas.width, y: data.end.y*app.canvas.height };
+      function handleStart(e) {
+        oldPos = eventToXY(e);
 
-      app.line(start, end, data.size, data.color);
-    });
-    //mode async
-    app.socket.on('tick', function(data){
-      var lines = data.lines.map(function(l) {
-        l.start.x = Math.round(l.start.x*app.canvas.width);
-        l.start.y = Math.round(l.start.y*app.canvas.height);
-        l.end.x = Math.round(l.end.x*app.canvas.width);
-        l.end.y = Math.round(l.end.y*app.canvas.height);
-        return l;
-      });
-      lines.forEach(function(l){
-        app.line(l.start, l.end, l.size, l.color);
-      });
-    });
+        handleMove(e); // draw a single point
+      }
 
-    app.socket.on('screenshot', function() {
-      var screenshot = app.screenshot();
-    app.emitScreenshotIfNotHeroku(app, screenshot)
-    });
-
-    app.socket.on('lastScreenshot', function(strDataURI){
-      console.log('lastscreenshot')
-      var ctx = app.canvas.getContext('2d');
-      var img = new Image;
-      img.onload = function(){
-        ctx.drawImage(img,0,0, img.width, img.height, 0, 0, app.canvas.width, app.canvas.height);
+      function handleMove(e) {
+        app.moving = true;
+        var newPos = eventToXY(e);
+        var data = {
+          start: {x: oldPos.x/app.canvas.width, y: oldPos.y/app.canvas.height},
+          end: {x: newPos.x/app.canvas.width, y: newPos.y/app.canvas.height},
+          size: size,
+          color: app.color
+        };
+        app.sendLines(data);
+        app.line(oldPos, newPos, size, app.color);
+        oldPos = newPos;
       };
-      img.src = strDataURI;
-    })
-    app.socket.on('galery', function(galeryFiles){
-      app.set('galeryFiles', galeryFiles);
-    });
+
+      function handleEnd(e) {
+        app.moving = false;
+        oldPos = {};
+      }
+
+      app.canvas.addEventListener('mousedown', function(e) {
+        if (e.which == 1) {
+          handleStart(e);
+        }
+      });
+
+      app.canvas.addEventListener('mousemove', function(e) {
+        e.preventDefault();
+        if (e.buttons & 1) {
+          handleMove(e);
+        }
+      });
+
+      app.canvas.addEventListener('mouseout', handleEnd);
+
+      app.canvas.addEventListener('touchstart', function(e) {
+        var touches = e.touches;
+        if (touches.length == 1) {
+          handleStart(touches[0]);
+        }
+      });
+
+      app.canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        var touches = e.touches;
+        if (touches.length == 1) {
+          //  console.log(eventToXY(touches[0]));
+          handleMove(touches[0]);
+        }
+      });
+
+      app.canvas.addEventListener('touchend', handleEnd);
+
+      window.onbeforeunload = function(){
+        var screenshot =   app.screenshot();
+        app.emitScreenshotIfNotHeroku(app, screenshot)
+        return "Voulez-vous vraiment quitter ? N'oubliez pas de partager votre oeuvre";
+      };
+
+      // download
+      const download = this.$.download;
+      const rand = i=>Math.random()*i<<0;
+      const fileName = `image${100+rand(100)}.png`;
+
+      function onClickAnchor(e) {
+        app.canvas.style.backgroundColor = 'rgba(255,255,255)';
+        var screenshot;
+        if (window.navigator.msSaveBlob) {
+          screenshot = app.canvas.msToBlob()
+          window.navigator.msSaveBlob(screenshot, fileName);
+          e.preventDefault();
+        } else {
+          screenshot = app.canvas.toDataURL();
+          download.setAttribute('download', fileName);
+          download.setAttribute('href', screenshot);
+        }
+        app.emitScreenshotIfNotHeroku(app, screenshot)
+      }
+      download.addEventListener('click', onClickAnchor);
+
+      this.connectSocket();
+    }
+
+    emitScreenshotIfNotHeroku(app,screenshot){
+      var host = window.location.host.split('.')[1] ;
+      app.socket.emit('screenshot', screenshot, host);
+    }
+
+    line(start, end, size, color) {
+      //    console.log(start, end)
+      var ctx = this.ctx;
+      var oldSize = ctx.lineWidth;
+      var oldColor = ctx.fillStyle;
+      ctx.lineWidth = size;
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+      ctx.closePath();
+      ctx.lineWidth = oldSize;
+      ctx.strokeStyle = oldColor;
+    }
+
+    launchAsync(tickDelay){
+      var app = this;
+      //async
+      app.tickInterval = setInterval(function() {
+        if(app.snapshotLines.length >0){
+          app.sendSnaphotLines();
+        }
+      }, tickDelay);
+    }
+
+    sendLines(data){
+      if (this.typeSync == "sync"){
+        this.socket.emit('line', data);
+      }else{
+        this.push('snapshotLines', data);
+      }
+    }
+
+    sendSnaphotLines(){
+      this.socket.emit('snapshotLines', this.snapshotLines);
+      this.snapshotLines = new Array();
+    }
+
+    screenshot(){
+      console.log("SCREENSHOT PLEASE")
+      var screenshot;
+      if (window.navigator.msSaveBlob) {
+        screenshot = window.navigator.msSaveBlob(this.canvas.msToBlob(), fileName);
+      } else {
+        screenshot =  this.canvas.toDataURL();
+      }
+      return screenshot;
+    }
+
+    initCanvas(){
+      var app = this;
+      this.canvas = this.$.canvas
+      if (this.canvas.getContext) {
+        this.ctx = this.canvas.getContext("2d");
+      }
+      this.ctx.lineCap = 'round';
+      this.ctx.lineJoin = 'round';
+      this.ctx.fillStyle = "white";
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      this.canvas=this.$.canvas;
+      window.addEventListener('resize', this._resize, false);
+      window.addEventListener('orientationchange', this._resize, false);
+      this._resize();
+    }
+
+    resizeCanvas() {
+      this.canvas = this.$.canvas;
+      var tempCanvas = document.createElement('canvas');
+      tempCanvas.id = "tempCanvas"
+      tempCanvas.width = this.canvas.width;
+      tempCanvas.height = this.canvas.height;
+      var tmpCtx = tempCanvas.getContext('2d');
+      // Copy to temporary canvas
+      tmpCtx.drawImage(this.canvas, 0, 0);
+      // Resize original canvas
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
+      // Copy back to resized canvas
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    hslToRgb(hue, sat, light) {
+      var sat = 0.93
+      var light = 0.47;
+      var t1, t2, r, g, b;
+      hue = hue / 60;
+      if ( light <= 0.5 ) {
+        t2 = light * (sat + 1);
+      } else {
+        t2 = light + sat - (light * sat);
+      }
+      t1 = light * 2 - t2;
+      r = Math.round(this.hueToRgb(t1, t2, hue + 2) * 255);
+      g = Math.round(this.hueToRgb(t1, t2, hue) * 255);
+      b = Math.round(this.hueToRgb(t1, t2, hue - 2) * 255);
+      //return {r : r, g : g, b : b};
+      return this.rgbToHex(r,g,b);
+    }
+
+    hueToRgb(t1, t2, hue) {
+      if (hue < 0) hue += 6;
+      if (hue >= 6) hue -= 6;
+      if (hue < 1) return (t2 - t1) * hue + t1;
+      else if(hue < 3) return t2;
+      else if(hue < 4) return (t2 - t1) * (4 - hue) + t1;
+      else return t1;
+    }
+
+    componentToHex(c) {
+      var hex = c.toString(16);
+      return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    rgbToHex(r, g, b) {
+      return "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
+    }
+
+    colorChanged(){
+      var app = this;
+      if(this.colors.length> 0){
+        var existe = this.colors.includes(this.color);
+        if (!existe){
+          this.unshift('colors', this.color);
+          this.pop('colors');
+          var el = document.createElement('button');
+          el.dataset.color = this.color;
+          el.style.background = this.color;
+          el.addEventListener('click', function() {
+            app.set('color',this.dataset.color);
+          });
+          this.colorToolbar.insertBefore(el, this.colorToolbar.firstChild);
+          this.colorToolbar.removeChild(this.colorToolbar.lastChild);
+        }
+      }
+    }
+
+    fullscreen(){
+      console.log("full")
+      if(this.webkitRequestFullScreen) {
+        this.webkitRequestFullScreen();
+      }
+      else {
+        this.mozRequestFullScreen();
+      }
+    }
+
+    _consoleStatus(newValue, oldValue){
+      console.log(oldValue +" -> "+ newValue);
+      if(oldValue == "reconnecting" && newValue =="disconnected"){
+        this.retry --;
+        console.log(this.retry);
+        if (this.retry <= 0){
+          this.socket.disconnect();
+        }
+      }
+    }
+
+    connectSocket(connectUri, token) {
+      var app = this;
+      this.socket = io();
+      // Register listeners to expose connection status
+      this.socket.on('connect', () => this.status = 'connected');
+      this.socket.on('disconnect', () => this.status = 'disconnected');
+      this.socket.on('connect_error', () => this.status = 'disconnected');
+      this.socket.on('reconnecting', () => this.status = 'reconnecting');
+      this.socket.on('reconnect', () => this.status = 'connected');
+      this.socket.on('error', e => {
+        console.warn(`WebSocket error: ${JSON.stringify(e)}`);
+      });
+
+      // remote events
+      app.socket.on('num_clients', function(infos_clients) {
+        app.set('typeSync', infos_clients.typeSync);
+        app.set('counter', infos_clients.num_clients);
+        if(app.typeSync == 'async'){
+          app.launchAsync(infos_clients.tickDelay);
+        }else{
+          if(app.snapshotLines.length >0){
+            app.io.emit('snapshotLines', app.snapshotLines);
+            app.snapshotLines = new Array();
+          }
+          clearInterval(app.tickInterval);
+        }
+
+      });
+      // mode sync
+      app.socket.on('line', function(data) {
+
+        var start= {x: data.start.x*app.canvas.width, y: data.start.y*app.canvas.height };
+        var end = {x: data.end.x*app.canvas.width, y: data.end.y*app.canvas.height };
+
+        app.line(start, end, data.size, data.color);
+      });
+      //mode async
+      app.socket.on('tick', function(data){
+        var lines = data.lines.map(function(l) {
+          l.start.x = Math.round(l.start.x*app.canvas.width);
+          l.start.y = Math.round(l.start.y*app.canvas.height);
+          l.end.x = Math.round(l.end.x*app.canvas.width);
+          l.end.y = Math.round(l.end.y*app.canvas.height);
+          return l;
+        });
+        lines.forEach(function(l){
+          app.line(l.start, l.end, l.size, l.color);
+        });
+      });
+
+      app.socket.on('screenshot', function() {
+        var screenshot = app.screenshot();
+        app.emitScreenshotIfNotHeroku(app, screenshot)
+      });
+
+      app.socket.on('lastScreenshot', function(strDataURI){
+        console.log('lastscreenshot')
+        var ctx = app.canvas.getContext('2d');
+        var img = new Image;
+        img.onload = function(){
+          ctx.drawImage(img,0,0, img.width, img.height, 0, 0, app.canvas.width, app.canvas.height);
+        };
+        img.src = strDataURI;
+      })
+      app.socket.on('galery', function(galeryFiles){
+        app.set('galeryFiles', galeryFiles);
+      });
+    }
+    _showGalerie(){
+      this.showslideshow = true;
+    }
   }
-  _showGalerie(){
-    this.showslideshow = true;
-  }
-}
-window.customElements.define(YdcApp.is, YdcApp);
+  window.customElements.define(YdcApp.is, YdcApp);
 </script>
 </dom-module>
